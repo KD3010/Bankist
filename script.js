@@ -1,9 +1,5 @@
 'use strict';
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// BANKIST APP
-
 // Data
 const account1 = {
   owner: 'Kushagra Devda',
@@ -61,10 +57,94 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
+const createUserNames = function (acc) {
+  acc.map(user => {
+    user.username = user.owner
+      .toLowerCase()
+      .split(' ')
+      .map(word => word[0])
+      .join('');
+  });
+};
 
+createUserNames(accounts);
+
+const displayBalance = function (mov) {
+  const balance = mov.reduce((acc, curr) => acc + curr, 0);
+  labelBalance.innerHTML = `${balance}€`;
+};
+
+// displayBalance(account1.movements);
+
+const displayMovements = function (movements) {
+  movements.forEach((mov, i) => {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const html = `<div class="movements__row">
+    <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+    <div class="movements__value">${mov} €</div>
+  </div>`;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+// displayMovements(account1.movements);
+
+const calcDisplaySummary = function (account) {
+  const { movements, interestRate } = account;
+  const calcDeposit = movements
+    .filter(m => m > 0)
+    .reduce((acc, curr) => acc + curr, 0);
+
+  const calcWithdrawal = movements
+    .filter(m => m < 0)
+    .reduce((acc, curr) => acc + curr, 0);
+
+  const interest = movements
+    .filter(m => m > 0)
+    .map(deposit => (deposit * interestRate) / 100)
+    .filter(int => int >= 1)
+    .reduce((acc, curr) => acc + curr, 0);
+
+  labelSumIn.textContent = `${calcDeposit}€`;
+  labelSumOut.textContent = `${Math.abs(calcWithdrawal)}€`;
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+// calcDisplaySummary(account1);
+
+// Event Handlers
+
+let currentAccount;
+btnLogin.addEventListener('click', function (event) {
+  // Prevent form from submitting
+  event.preventDefault();
+
+  currentAccount = accounts.find(
+    account => account.username === inputLoginUsername.value.toLowerCase()
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and Message
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 100;
+
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    // Display Movements
+    displayMovements(currentAccount.movements);
+    // Display Balance
+    displayBalance(currentAccount.movements);
+    // Display Summary
+    calcDisplaySummary(currentAccount);
+  }
+});
+
+/*
 const currencies = new Map([
   ['USD', 'United States dollar'],
   ['EUR', 'Euro'],
@@ -73,4 +153,50 @@ const currencies = new Map([
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-/////////////////////////////////////////////////
+const euroToUSDConversion = function (movements) {
+  const euroToUsd = 1.1;
+  const convertedToUSD = movements.map(mov => Math.trunc(mov * euroToUsd));
+
+  console.log(...convertedToUSD);
+};
+
+// euroToUSDConversion(movements);
+
+const movementsDescription = function (movements) {
+  const movementDescArr = movements.map(
+    (mov, i) =>
+      `Movement ${i + 1}: You ${mov > 0 ? `deposited` : `withdrew`} ${mov}₤`
+  );
+  console.log(movementDescArr);
+};
+
+// movementsDescription(movements);
+
+const createDeposits = function(movements) {
+  const deposits = movements.filter(mov => mov > 0);
+  console.log(deposits);
+}
+
+// createDeposits(movements);
+
+const createWithdrawals = function(movements) {
+  const withdrawals = movements.filter(mov => mov < 0);
+  console.log(withdrawals);
+}
+
+// createWithdrawals(movements);
+
+const calculateBalance = function(movements) {
+  const balance = movements.reduce((acc, cur) => acc + cur, 0);
+  console.log(balance);
+}
+
+// calculateBalance(movements);
+
+const calculateMaximum = function(movements) {
+  const max = movements.reduce((acc, curr) => (acc > curr) ? acc : curr, movements[0]);
+  console.log(max);
+}
+
+calculateMaximum(movements);
+*/
