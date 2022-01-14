@@ -76,8 +76,14 @@ const displayBalance = function (acc) {
 
 // displayBalance(account1.movements);
 
-const displayMovements = function (movements) {
-  movements.forEach((mov, i) => {
+const displayMovements = function (movements, sort = false) {
+  containerMovements.innerHTML = '';
+
+  const sortedMovements = sort
+    ? movements.slice().sort((a, b) => a - b)
+    : movements;
+
+  sortedMovements.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
     const html = `<div class="movements__row">
@@ -172,13 +178,29 @@ btnTransfer.addEventListener('click', function (event) {
   }
 });
 
+btnLoan.addEventListener('click', function (event) {
+  event.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+  if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
+    currentAccount.movements.push(amount);
+
+    // Updating the UI
+    updateUI(currentAccount);
+  }
+
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+});
+
 btnClose.addEventListener('click', function (event) {
   // Remove default action
   event.preventDefault();
 
   if (
     inputCloseUsername.value === currentAccount.username &&
-    Number(inputClosePin.value) === currentAccount.pin
+    Number(inputClosePin.value) === currentAccount.pin &&
+    currentAccount.balance > 0
   ) {
     const toBeDeletedAccIndex = accounts.findIndex(
       acc => acc.username === currentAccount.username
@@ -186,10 +208,22 @@ btnClose.addEventListener('click', function (event) {
     accounts.splice(toBeDeletedAccIndex, 1);
     containerApp.style.opacity = 0;
     labelWelcome.textContent = `Log in to get started`;
-  } else console.log('Invaild Username/Password');
+  } else {
+    if (currentAccount.balance < 0) {
+      console.log('You can not close account with a loan pending');
+    } else console.log('Invaild Username/Password');
+  }
 
   inputClosePin.value = inputCloseUsername.value = '';
   inputClosePin.blur();
+});
+
+let isSorted = false;
+btnSort.addEventListener('click', function (event) {
+  event.preventDefault();
+
+  displayMovements(currentAccount.movements, !isSorted);
+  isSorted = !isSorted;
 });
 /*
 const currencies = new Map([
