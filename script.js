@@ -69,9 +69,9 @@ const createUserNames = function (acc) {
 
 createUserNames(accounts);
 
-const displayBalance = function (mov) {
-  const balance = mov.reduce((acc, curr) => acc + curr, 0);
-  labelBalance.innerHTML = `${balance}€`;
+const displayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((foundacc, curr) => foundacc + curr, 0);
+  labelBalance.innerHTML = `${acc.balance}€`;
 };
 
 // displayBalance(account1.movements);
@@ -114,6 +114,16 @@ const calcDisplaySummary = function (account) {
 
 // calcDisplaySummary(account1);
 
+// Update UI
+const updateUI = function (acc) {
+  // Display Movements
+  displayMovements(acc.movements);
+  // Display Balance
+  displayBalance(acc);
+  // Display Summary
+  calcDisplaySummary(acc);
+};
+
 // Event Handlers
 
 let currentAccount;
@@ -135,15 +145,52 @@ btnLogin.addEventListener('click', function (event) {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
 
-    // Display Movements
-    displayMovements(currentAccount.movements);
-    // Display Balance
-    displayBalance(currentAccount.movements);
-    // Display Summary
-    calcDisplaySummary(currentAccount);
+    updateUI(currentAccount);
+  } else console.log(`Incorrect Username/Password`);
+});
+
+btnTransfer.addEventListener('click', function (event) {
+  // Preventing default action
+  event.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const transferTo = accounts.find(
+    acc => acc.username === inputTransferTo.value
+  );
+
+  if (
+    amount > 0 &&
+    transferTo &&
+    currentAccount.balance >= amount &&
+    transferTo?.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    transferTo.movements.push(amount);
+    updateUI(currentAccount);
+    inputTransferAmount.value = inputTransferTo.value = '';
+    inputTransferAmount.blur();
   }
 });
 
+btnClose.addEventListener('click', function (event) {
+  // Remove default action
+  event.preventDefault();
+
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const toBeDeletedAccIndex = accounts.findIndex(
+      acc => acc.username === currentAccount.username
+    );
+    accounts.splice(toBeDeletedAccIndex, 1);
+    containerApp.style.opacity = 0;
+    labelWelcome.textContent = `Log in to get started`;
+  } else console.log('Invaild Username/Password');
+
+  inputClosePin.value = inputCloseUsername.value = '';
+  inputClosePin.blur();
+});
 /*
 const currencies = new Map([
   ['USD', 'United States dollar'],
