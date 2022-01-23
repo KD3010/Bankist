@@ -2,6 +2,7 @@
 
 ///////////////////////////////////////
 // Modal window
+const loginBtn = document.querySelector('.btn--login');
 
 const modal = document.querySelector('.modal');
 const overlay = document.querySelector('.overlay');
@@ -22,8 +23,21 @@ const section1 = document.querySelector('#section--1');
 
 const nav = document.querySelector('nav');
 const navLinks = document.querySelector('.nav__links');
+
+const slides = document.querySelectorAll('.slide');
+const buttonLeft = document.querySelector('.slider__btn--left');
+const buttonRight = document.querySelector('.slider__btn--right');
+let currentSlide = 0;
+const dotContainer = document.querySelector('.dots');
 ///////////////////////////////////////
 
+// Login Page
+loginBtn.addEventListener('click', function(){
+  window.open("../Bankist-App/index.html", '_blank')
+})
+
+
+// Modal
 const openModal = function (e) {
   // Preventing default
   e.preventDefault();
@@ -227,3 +241,73 @@ const imageOvbserver = new IntersectionObserver(lazyLoad, {
 });
 
 imageTarget.forEach(img => imageOvbserver.observe(img));
+
+// Building Slider
+
+// Functioning Methods
+const slider = function () {
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots_dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+  createDots();
+
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll('.dots_dot')
+      .forEach(dot => dot.classList.remove('dots_dot--active'));
+
+    document
+      .querySelector(`.dots_dot[data-slide="${slide}"]`)
+      .classList.add(`dots_dot--active`);
+  };
+
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${(i - slide) * 100}%)`)
+    );
+  };
+
+  slides.forEach((s, i) => (s.style.transform = `translateX(${i * 100}%)`));
+  activateDot(0);
+  goToSlide(0);
+
+  const nextSlide = function () {
+    currentSlide !== slides.length - 1 ? currentSlide++ : (currentSlide = 0);
+    goToSlide(currentSlide);
+    activateDot(currentSlide);
+  };
+
+  const prevSlide = function () {
+    currentSlide !== 0 ? currentSlide-- : (currentSlide = 3);
+    goToSlide(currentSlide);
+    activateDot(currentSlide);
+  };
+
+  // Event Handlers
+  buttonRight.addEventListener('click', nextSlide);
+
+  buttonLeft.addEventListener('click', prevSlide);
+
+  document.addEventListener('keydown', function (e) {
+    e.key === 'ArrowRight' && nextSlide();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    e.key === 'ArrowLeft' && prevSlide();
+  });
+
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots_dot')) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slide);
+    }
+  });
+};
+
+slider();
