@@ -33,7 +33,7 @@ const dotContainer = document.querySelector('.dots');
 
 // Login Page
 loginBtn.addEventListener('click', function(){
-  window.open("./Bankist-App/index.html", '_blank')
+  window.open("/Bankist-App/index.html", '_blank')
 })
 
 
